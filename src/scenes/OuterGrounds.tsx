@@ -8,6 +8,9 @@ import { playerState } from '../game/player/playerState';
 import { getDerived, useDerived, worldStore } from '../game/world/worldState';
 import { emitSound, LOUDNESS } from '../game/ai/sound/soundBus';
 import { showMessage } from '../game/ui/messages';
+import { FloodHazard } from '../game/systems/electricity/FloodHazard';
+import { Scannable } from '../game/tools/scanner';
+import { useStore } from '../utils/store';
 
 type V3 = [number, number, number];
 
@@ -98,6 +101,7 @@ function HydraulicDoor() {
 function MaintenanceBuilding() {
   const power = useDerived((d) => d.anyPower);
   const pumpOn = useDerived((d) => d.pumpBRunning);
+  const breakerLive = useStore(worldStore, (f) => f.corridorLive);
   const jammed = useDerived((d) => !d.pumpBRunning && worldStore.get().pumpBJammed);
   const flick = useRef<THREE.PointLight>(null);
   useFrame(({ clock }) => { if (flick.current) flick.current.intensity = power ? 9 + Math.sin(clock.elapsedTime * 41) * Math.sin(clock.elapsedTime * 13) * 1.5 : 0; });
@@ -141,7 +145,28 @@ function MaintenanceBuilding() {
 
       {/* flooded corridor beyond the door (hazard hookup comes next) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-12, 0.3, -17]}><planeGeometry args={[9.6, 3.6]} /><meshStandardMaterial color="#1c3a4a" transparent opacity={0.75} roughness={0.15} metalness={0.3} /></mesh>
-      <mesh position={[-12, 2.2, -17.5]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.03, 0.03, 4, 6]} /><meshStandardMaterial color="#111" /></mesh>
+      <FloodHazard />
+      {/* warning sign on the partition, facing the pump room */}
+      <mesh position={[-14.4, 1.9, -14.82]}><boxGeometry args={[0.7, 0.45, 0.03]} /><meshStandardMaterial color="#d9b72a" emissive="#d9b72a" emissiveIntensity={0.25} /></mesh>
+      <mesh position={[-14.4, 1.9, -14.8]} rotation={[0, 0, 0.5]}><boxGeometry args={[0.06, 0.32, 0.02]} /><meshStandardMaterial color="#111" /></mesh>
+
+      {/* corridor breaker */}
+      <mesh position={[-7.3, 1.4, -12.6]}><boxGeometry args={[0.12, 0.7, 0.5]} /><meshStandardMaterial color="#5b5f6a" /></mesh>
+      <mesh position={[-7.22, 1.65, -12.6]}><sphereGeometry args={[0.05, 8, 8]} /><meshStandardMaterial color={breakerLive ? '#ff5a3c' : '#3cff7a'} emissive={breakerLive ? '#ff5a3c' : '#3cff7a'} emissiveIntensity={1.5} /></mesh>
+      <Interactable id="corridor-breaker" position={[-7.5, 1.4, -12.6]} verb="Flip breaker" label="Corridor B circuit"
+        onUse={() => { const v = !worldStore.get().corridorLive; worldStore.set({ corridorLive: v }); emitSound('tool', [-7.5, 1.4, -12.6], LOUDNESS.jog);
+          showMessage(['CORRIDOR B CIRCUIT', v ? 'ENERGIZED' : 'ISOLATED']); }} />
+
+      {/* corridor end terminal */}
+      <mesh position={[-12, 1.1, -18.6]}><boxGeometry args={[0.7, 0.9, 0.4]} /><meshStandardMaterial color="#2a3a30" emissive="#2f7a4a" emissiveIntensity={0.7} /></mesh>
+      <Interactable id="corridor-terminal" position={[-12, 1.1, -18.3]} verb="Read" label="Tunnel access terminal"
+        onUse={() => showMessage(['TUNNEL ACCESS B', 'ROUTE TO OBSERVATION DECK LOGGED', '', '(end of current build)'], 7000)} />
+
+      {/* scanner readings */}
+      <Scannable id="sc-cable" position={[-12, 1.5, -17]} range={9} read={() => ['ELECTRICAL CURRENT', getDerived().corridorElectrified ? 'DETECTED' : 'NONE', 'WATER FLOW', '\u2192 SOUTH']} />
+      <Scannable id="sc-door" position={[-12, 1.5, -15]} range={6} read={() => ['LINE PRESSURE', getDerived().pressure >= 1 ? 'NOMINAL' : 'INSUFFICIENT']} />
+      <Scannable id="sc-pump" position={[-9, 0.6, -11]} range={5} read={() => ['PUMP B', worldStore.get().pumpBJammed ? 'ROTOR OBSTRUCTED' : getDerived().anyPower ? 'RUNNING' : 'NO POWER']} />
+      <Scannable id="sc-structure" position={[-12, 1.5, -14]} range={10} read={() => ['STRUCTURAL INTEGRITY', '58%']} />
     </group>
   );
 }

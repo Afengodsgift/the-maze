@@ -6,6 +6,8 @@ import { bindInput } from './input/input';
 import { Player } from './player/Player';
 import { FollowCamera } from './camera/FollowCamera';
 import { InteractionSystem } from './interaction/interaction';
+import { ScannerSystem } from './tools/scanner';
+import { AudioSystem } from './audio/AudioSystem';
 import { Hud } from './ui/Hud';
 import { TouchControls } from './ui/TouchControls';
 import { OuterGrounds } from '../scenes/OuterGrounds';
@@ -24,6 +26,8 @@ export default function Game() {
             <Player />
             <FollowCamera />
             <InteractionSystem />
+            <ScannerSystem />
+            <AudioSystem />
           </Physics>
         </Suspense>
       </Canvas>

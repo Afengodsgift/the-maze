@@ -10,9 +10,10 @@ export interface WorldFlags {
   mainPower: boolean;
   auxPower: boolean;
   pumpBJammed: boolean;
+  corridorLive: boolean; // breaker for the flooded corridor circuit
 }
 
-export const worldStore = createStore<WorldFlags>({ mainPower: false, auxPower: false, pumpBJammed: true });
+export const worldStore = createStore<WorldFlags>({ mainPower: false, auxPower: false, pumpBJammed: true, corridorLive: true });
 
 export interface Derived {
   anyPower: boolean;
@@ -21,6 +22,7 @@ export interface Derived {
   pressure: number; // 0..1
   hydraulicDoorOpen: boolean;
   floodRising: boolean;
+  corridorElectrified: boolean;
 }
 
 export function derive(f: WorldFlags): Derived {
@@ -28,7 +30,7 @@ export function derive(f: WorldFlags): Derived {
   const securityOn = f.mainPower;
   const pumpBRunning = anyPower && !f.pumpBJammed;
   const pressure = pumpBRunning ? 1 : 0;
-  return { anyPower, securityOn, pumpBRunning, pressure, hydraulicDoorOpen: pressure >= 1, floodRising: !pumpBRunning };
+  return { anyPower, securityOn, pumpBRunning, pressure, hydraulicDoorOpen: pressure >= 1, floodRising: !pumpBRunning, corridorElectrified: anyPower && f.corridorLive };
 }
 
 export const getDerived = () => derive(worldStore.get());

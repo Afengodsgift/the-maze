@@ -1,14 +1,25 @@
 'use client';
 import { promptStore } from '../interaction/interaction';
-import { messageStore } from './messages';
+import { messageStore, fxStore } from './messages';
+import { scannerStore } from '../tools/scanner';
 import { useStore } from '../../utils/store';
 
 export function Hud() {
   const verb = useStore(promptStore, (s) => s.verb);
   const label = useStore(promptStore, (s) => s.label);
   const lines = useStore(messageStore, (s) => s.lines.join('\n'));
+  const flash = useStore(fxStore, (s) => s.flash);
+  const scanOn = useStore(scannerStore, (s) => s.on);
+  const scan = useStore(scannerStore, (s) => s.lines.join('\n'));
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', color: '#d8e0e6', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#ffe9a8', opacity: flash * 0.55, transition: flash ? 'none' : 'opacity .6s' }} />
+      {scanOn && (
+        <div style={{ position: 'absolute', left: 14, bottom: 120, whiteSpace: 'pre-line', fontFamily: 'Courier New, monospace', fontSize: 13, lineHeight: 1.5,
+          background: 'rgba(6,12,10,.68)', color: '#9fe0b4', padding: '10px 14px', borderLeft: '2px solid #9fe0b4', maxWidth: '56vw' }}>
+          {scan || 'NO READINGS'}
+        </div>
+      )}
       {lines && (
         <div style={{ position: 'absolute', top: '12%', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'pre-line', textAlign: 'center',
           fontFamily: 'Courier New, monospace', fontSize: 15, lineHeight: 1.6, background: 'rgba(6,12,10,.72)', color: '#9fe0b4', padding: '12px 18px', borderRadius: 2 }}>

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { input, touch } from '../input/input';
+import { toggleScanner } from '../tools/scanner';
 import { promptStore } from '../interaction/interaction';
 import { useStore } from '../../utils/store';
 
@@ -41,6 +42,7 @@ export function TouchControls() {
         onPointerUp={() => { touch.sprint = false; }} onPointerCancel={() => { touch.sprint = false; }}>Sprint</button>
       <button style={{ ...btn, right: 18, bottom: 102, background: crouch ? '#ffffff40' : '#ffffff14' }}
         onPointerDown={(e) => { e.stopPropagation(); touch.crouch = !touch.crouch; setCrouch(touch.crouch); }}>Crouch</button>
+      <button style={{ ...btn, right: 166, bottom: 28 }} onPointerDown={(e) => { e.stopPropagation(); toggleScanner(); }}>Scan</button>
       {hasPrompt && <button style={{ ...btn, right: 92, bottom: 102, width: 70, height: 70, borderRadius: 35, background: '#9fe0b433', borderColor: '#9fe0b4' }}
         onPointerDown={(e) => { e.stopPropagation(); input.interact = true; }}>Use</button>}
     </div>

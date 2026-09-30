@@ -35,7 +35,7 @@ export function Player() {
     let mode: keyof typeof SPEED = mag < 0.5 ? 'walk' : 'jog';
     if (input.sprint && mag > 0.6) mode = 'sprint';
     if (input.crouch) mode = 'crouch';
-    const target = mag > 0.05 ? SPEED[mode] * (mode === 'walk' ? mag * 2 : 1) : 0;
+    const target = mag > 0.05 ? SPEED[mode] * (mode === 'walk' ? mag * 2 : 1) * (playerState.inWater ? 0.6 : 1) : 0;
 
     const v = body.linvel();
     const accel = target > 0 ? 14 : 20; // acceleration / deceleration, no instant arcade stops
@@ -69,7 +69,7 @@ export function Player() {
       stride.current += speed * dt;
       if (stride.current > 2.0) {
         stride.current = 0;
-        emitSound('footstep', [t.x, t.y - 0.9, t.z], LOUDNESS[mode === 'crouch' ? 'crouch' : mode]);
+        emitSound(playerState.inWater ? 'water' : 'footstep', [t.x, t.y - 0.9, t.z], Math.min(1, LOUDNESS[mode] * (playerState.inWater ? 1.3 : 1)));
       }
     }
   });
