@@ -6,22 +6,9 @@ import * as THREE from 'three';
 import { input, pollMovement } from '../input/input';
 import { emitSound, LOUDNESS } from '../ai/sound/soundBus';
 import { playerState } from './playerState';
+import { Humanoid } from './Humanoid';
 
 const SPEED = { crouch: 1.4, walk: 2.2, jog: 3.8, sprint: 6.0 };
-
-/** Placeholder humanoid (swap for a skinned GLB later). */
-function Humanoid({ crouching }: { crouching: boolean }) {
-  const s = crouching ? 0.75 : 1;
-  return (
-    <group scale={[1, s, 1]}>
-      <mesh castShadow position={[0, 0.95, 0]}><boxGeometry args={[0.5, 0.7, 0.28]} /><meshStandardMaterial color="#6b5a3e" roughness={0.9} /></mesh>
-      <mesh castShadow position={[0, 1.5, 0]}><sphereGeometry args={[0.15, 12, 12]} /><meshStandardMaterial color="#c9a98a" /></mesh>
-      <mesh castShadow position={[-0.12, 0.4, 0]}><boxGeometry args={[0.18, 0.8, 0.2]} /><meshStandardMaterial color="#2d3238" /></mesh>
-      <mesh castShadow position={[0.12, 0.4, 0]}><boxGeometry args={[0.18, 0.8, 0.2]} /><meshStandardMaterial color="#2d3238" /></mesh>
-      <mesh position={[0, 1.0, -0.17]}><boxGeometry args={[0.3, 0.05, 0.05]} /><meshStandardMaterial color="#e8c35a" emissive="#e8c35a" emissiveIntensity={0.2} /></mesh>
-    </group>
-  );
-}
 
 export function Player() {
   const rb = useRef<RapierRigidBody>(null);
@@ -59,6 +46,7 @@ export function Player() {
     const ray = new rapier.Ray({ x: t.x, y: t.y, z: t.z }, { x: 0, y: -1, z: 0 });
     const hit = world.castRay(ray, 1.15, true, undefined, undefined, undefined, body);
     const grounded = !!hit && v.y < 0.5;
+    playerState.grounded = grounded;
 
     let vy = v.y;
     if (input.jump) { if (grounded && !input.crouch) vy = 5.6; input.jump = false; }
@@ -89,7 +77,7 @@ export function Player() {
   return (
     <RigidBody ref={rb} colliders={false} position={[0, 1.2, 16]} enabledRotations={[false, false, false]} linearDamping={0} ccd>
       <CapsuleCollider args={[0.5, 0.4]} friction={0} />
-      <group ref={model} position={[0, -0.9, 0]}><Humanoid crouching={input.crouch} /></group>
+      <group ref={model} position={[0, -0.9, 0]}><Humanoid /></group>
     </RigidBody>
   );
 }
