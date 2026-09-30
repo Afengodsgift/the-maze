@@ -16,8 +16,8 @@ export default function Game() {
   return (
     <div ref={wrap} style={{ position: 'fixed', inset: 0, touchAction: 'none' }}>
       <Canvas shadows dpr={[1, 1.5]} camera={{ fov: 62, near: 0.1, far: 220 }}>
-        <color attach="background" args={['#0a1016']} />
-        <fogExp2 attach="fog" args={['#0a1016', 0.016]} />
+        <color attach="background" args={['#1c2a3a']} />
+        <fogExp2 attach="fog" args={['#1c2a3a', 0.012]} />
         <Suspense fallback={null}>
           <Physics gravity={[0, -18, 0]}>
             <OuterGrounds />

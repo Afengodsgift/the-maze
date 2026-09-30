@@ -46,7 +46,7 @@ function Forest() {
   return (
     <>
       <instancedMesh ref={trunk} args={[undefined, undefined, trees.length]} castShadow><cylinderGeometry args={[0.22, 0.32, 1, 6]} /><meshStandardMaterial color="#2b2118" roughness={1} /></instancedMesh>
-      <instancedMesh ref={crown} args={[undefined, undefined, trees.length]} castShadow><coneGeometry args={[1, 1, 7]} /><meshStandardMaterial color="#14241b" roughness={1} /></instancedMesh>
+      <instancedMesh ref={crown} args={[undefined, undefined, trees.length]} castShadow><coneGeometry args={[1, 1, 7]} /><meshStandardMaterial color="#1f3a2a" roughness={1} /></instancedMesh>
       <RigidBody type="fixed" colliders={false}>{trees.map((t, i) => <CuboidCollider key={i} args={[0.3, 3, 0.3]} position={[t.x, 3, t.z]} />)}</RigidBody>
     </>
   );
@@ -73,7 +73,7 @@ function MoonLight() {
     l.position.set(p.x + 18, p.y + 40, p.z + 10); l.target.position.set(p.x, p.y, p.z); l.target.updateMatrixWorld();
   });
   return (<>
-    <directionalLight ref={light} intensity={0.55} color="#8aa4c8" castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30} shadow-camera-far={90} />
+    <directionalLight ref={light} intensity={1.6} color="#a9c0e0" castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30} shadow-camera-far={90} />
     {light.current && <primitive object={light.current.target} />}
   </>);
 }
@@ -149,12 +149,12 @@ function MaintenanceBuilding() {
 export function OuterGrounds() {
   return (
     <>
-      <ambientLight intensity={0.35} color="#5a6f8c" />
-      <hemisphereLight args={['#4a5f7a', '#10140f', 0.35]} />
+      <ambientLight intensity={1.2} color="#8fa6c4" />
+      <hemisphereLight args={["#7a93b5", "#2a3328", 1.0]} /><PlayerGlow />
       <MoonLight />
       <Rain />
       <RigidBody type="fixed" colliders={false}><CuboidCollider args={[150, 0.5, 150]} position={[0, -0.5, 0]} /></RigidBody>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[300, 300]} /><meshStandardMaterial color="#1a231c" roughness={1} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[300, 300]} /><meshStandardMaterial color="#33443a" roughness={1} /></mesh>
       <Forest />
 
       {/* crashed security vehicle at spawn */}
@@ -178,4 +178,11 @@ export function OuterGrounds() {
       <mesh position={[35, 44.5, -55]}><sphereGeometry args={[0.35, 8, 8]} /><meshStandardMaterial color="#ff2a2a" emissive="#ff2a2a" emissiveIntensity={2} /></mesh>
     </>
   );
+}
+
+/** Soft light that follows the player so nearby surroundings stay readable in the dark. */
+function PlayerGlow() {
+  const l = useRef<THREE.PointLight>(null);
+  useFrame(() => { l.current?.position.set(playerState.pos.x, playerState.pos.y + 2.2, playerState.pos.z); });
+  return <pointLight ref={l} intensity={14} distance={18} decay={1.6} color="#cfe0ff" />;
 }
