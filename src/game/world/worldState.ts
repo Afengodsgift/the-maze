@@ -1,39 +1,29 @@
 import { createStore, useStore } from '../../utils/store';
 
 /**
- * Source-of-truth flags. Everything else is DERIVED, so systems affect each
- * other through one function instead of ad-hoc wiring:
- *   power -> security -> doors      power -> pumps -> pressure / flood
- * World state lives here, independent of which sectors are loaded.
+ * Generic maze state: a flat map of mechanism id -> value (number | boolean).
+ * Levers, rotators, gates, traps and checkpoints all read/write through here, so one
+ * mechanism can drive any other. Persisted to localStorage; independent of what is loaded.
  */
-export interface WorldFlags {
-  mainPower: boolean;
-  auxPower: boolean;
-  pumpBJammed: boolean;
-  corridorLive: boolean; // breaker for the flooded corridor circuit
+export type Val = number | boolean;
+const KEY = 'the-maze:world:v1';
+
+export const worldStore = createStore<{ values: Record<string, Val> }>({ values: {} });
+
+let hydrated = false;
+export function hydrateWorld() {
+  if (hydrated || typeof window === 'undefined') return;
+  hydrated = true;
+  try { worldStore.set({ values: JSON.parse(localStorage.getItem(KEY) || '{}') }); } catch { /* fresh world */ }
 }
 
-export const worldStore = createStore<WorldFlags>({ mainPower: false, auxPower: false, pumpBJammed: true, corridorLive: true });
-
-export interface Derived {
-  anyPower: boolean;
-  securityOn: boolean;
-  pumpBRunning: boolean;
-  pressure: number; // 0..1
-  hydraulicDoorOpen: boolean;
-  floodRising: boolean;
-  corridorElectrified: boolean;
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+function persist() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(worldStore.get().values)); } catch { /* ignore */ } }, 400);
 }
 
-export function derive(f: WorldFlags): Derived {
-  const anyPower = f.mainPower || f.auxPower;
-  const securityOn = f.mainPower;
-  const pumpBRunning = anyPower && !f.pumpBJammed;
-  const pressure = pumpBRunning ? 1 : 0;
-  return { anyPower, securityOn, pumpBRunning, pressure, hydraulicDoorOpen: pressure >= 1, floodRising: !pumpBRunning, corridorElectrified: anyPower && f.corridorLive };
-}
-
-export const getDerived = () => derive(worldStore.get());
-export function useDerived<S>(sel: (d: Derived) => S): S {
-  return useStore(worldStore, (f) => sel(derive(f)));
-}
+export function getValue<T extends Val>(id: string, def: T): T { return (worldStore.get().values[id] as T) ?? def; }
+export function setValue(id: string, v: Val) { worldStore.set((s) => ({ values: { ...s.values, [id]: v } })); persist(); }
+export function useValue<T extends Val>(id: string, def: T): T { return useStore(worldStore, (s) => (s.values[id] as T) ?? def); }
+export function resetWorld() { worldStore.set({ values: {} }); persist(); }

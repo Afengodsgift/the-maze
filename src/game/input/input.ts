@@ -1,5 +1,3 @@
-import { toggleScanner } from '../tools/scanner';
-
 export const input = {
   moveX: 0, moveY: 0, lookDX: 0, lookDY: 0, yaw: 0, pitch: 0.3,
   sprint: false, crouch: false, jump: false, interact: false,
@@ -12,7 +10,6 @@ export function bindInput(el: HTMLElement) {
     keys.add(e.code);
     if (e.code === 'KeyE') input.interact = true;
     if (e.code === 'Space') input.jump = true;
-    if (e.code === 'KeyQ') toggleScanner();
   };
   const ku = (e: KeyboardEvent) => keys.delete(e.code);
   const mm = (e: MouseEvent) => {

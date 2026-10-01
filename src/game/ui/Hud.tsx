@@ -1,7 +1,6 @@
 'use client';
 import { promptStore } from '../interaction/interaction';
 import { messageStore, fxStore } from './messages';
-import { scannerStore } from '../tools/scanner';
 import { useStore } from '../../utils/store';
 
 export function Hud() {
@@ -9,27 +8,14 @@ export function Hud() {
   const label = useStore(promptStore, (s) => s.label);
   const lines = useStore(messageStore, (s) => s.lines.join('\n'));
   const flash = useStore(fxStore, (s) => s.flash);
-  const scanOn = useStore(scannerStore, (s) => s.on);
-  const scan = useStore(scannerStore, (s) => s.lines.join('\n'));
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', color: '#d8e0e6', fontFamily: 'system-ui, sans-serif' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#ffe9a8', opacity: flash * 0.55, transition: flash ? 'none' : 'opacity .6s' }} />
-      {scanOn && (
-        <div style={{ position: 'absolute', left: 14, bottom: 120, whiteSpace: 'pre-line', fontFamily: 'Courier New, monospace', fontSize: 13, lineHeight: 1.5,
-          background: 'rgba(6,12,10,.68)', color: '#9fe0b4', padding: '10px 14px', borderLeft: '2px solid #9fe0b4', maxWidth: '56vw' }}>
-          {scan || 'NO READINGS'}
-        </div>
-      )}
-      {lines && (
-        <div style={{ position: 'absolute', top: '12%', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'pre-line', textAlign: 'center',
-          fontFamily: 'Courier New, monospace', fontSize: 15, lineHeight: 1.6, background: 'rgba(6,12,10,.72)', color: '#9fe0b4', padding: '12px 18px', borderRadius: 2 }}>
-          {lines}
-        </div>
-      )}
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', color: '#fff6e4', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#fff', opacity: flash * 0.5, transition: flash ? 'none' : 'opacity .6s' }} />
+      {lines && <div style={{ position: 'absolute', top: '12%', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'pre-line', textAlign: 'center', fontSize: 15, lineHeight: 1.6, background: 'rgba(40,28,16,.6)', padding: '10px 16px', borderRadius: 6 }}>{lines}</div>}
       {verb && (
-        <div style={{ position: 'absolute', bottom: '26%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', fontSize: 15, textShadow: '0 1px 4px #000' }}>
-          <span style={{ border: '1px solid #d8e0e6aa', borderRadius: 3, padding: '1px 7px', marginRight: 8, fontSize: 13 }}>E</span>
-          {verb} <span style={{ opacity: 0.6 }}>{label}</span>
+        <div style={{ position: 'absolute', bottom: '26%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', fontSize: 15, textShadow: '0 1px 4px #000a' }}>
+          <span style={{ border: '1px solid #fff6e4aa', borderRadius: 3, padding: '1px 7px', marginRight: 8, fontSize: 13 }}>E</span>
+          {verb} <span style={{ opacity: 0.7 }}>{label}</span>
         </div>
       )}
     </div>

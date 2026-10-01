@@ -8,9 +8,9 @@ Scanner: Q (or the Scan button) toggles readings near hazards and machines.
 
 ## Structure
 - `src/game/world/worldState.ts` — source-of-truth flags + `derive()` (power → security/pumps/pressure/flood)
-- `src/game/ai/sound/soundBus.ts` — sound events the Hunter will subscribe to
+
 - `src/game/player`, `camera`, `input`, `interaction`, `ui` — reusable systems
-- `src/scenes/OuterGrounds.tsx` — Area 01 + maintenance building (panel → Pump B → hydraulic door)
+- `src/scenes/Maze01.tsx` — proving ground now; Maze 01 is built from the same pieces
 
 ## Next
 Flooded-corridor hazard, scanner/multitool, Hunter AI, save (Supabase), sector streaming.
