@@ -4,6 +4,7 @@ import { Gate } from '../game/mechanisms/Gate';
 import { Lever } from '../game/mechanisms/Lever';
 import { Rotator } from '../game/mechanisms/Rotator';
 import { palette } from '../game/visual/palette';
+import { CliffRing } from './CliffRing';
 import { StaticBlocks, type BlockDef } from '../game/visual/StaticBlocks';
 
 /**
@@ -23,6 +24,7 @@ const blocks: BlockDef[] = [
 export function Maze01() {
   return (
     <>
+      <CliffRing />
       <StaticBlocks blocks={blocks} />
       <Rotator id="ring" center={[0, 0.2, 0]} stops={[0, Math.PI / 2, Math.PI]} speed={0.5}>
         <CuboidCollider args={[3.5, 0.2, 1.2]} />
