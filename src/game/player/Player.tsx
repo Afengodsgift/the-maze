@@ -54,7 +54,7 @@ export function Player() {
     const v = vel.current, accel = target > 0 ? 14 : 20;
     const approach = (cur: number, tgt: number) => cur + Math.max(-accel * dt, Math.min(accel * dt, tgt - cur));
     v.x = approach(v.x, dx * target); v.z = approach(v.z, dz * target);
-    if (grounded.current && v.y <= 0) v.y = -1;
+    if (grounded.current && v.y <= 0) v.y = 0; // no downward push: it stalls the controller on kinematic platforms (snap-to-ground keeps us stuck to slopes)
     else v.y = Math.max(-25, v.y - GRAVITY * dt);
     if (input.jump) { if (grounded.current && !input.crouch) v.y = 5.6; input.jump = false; }
 
