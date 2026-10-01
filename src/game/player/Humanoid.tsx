@@ -15,10 +15,32 @@ interface B { bone: THREE.Bone; wp: THREE.Quaternion; wpInv: THREE.Quaternion; r
 const NAMES = ['Hips', 'Spine', 'Spine1', 'Spine2', 'Head', 'LeftArm', 'LeftForeArm', 'RightArm', 'RightForeArm', 'LeftUpLeg', 'LeftLeg', 'LeftFoot', 'RightUpLeg', 'RightLeg', 'RightFoot'] as const;
 type Name = (typeof NAMES)[number];
 
+/**
+ * This model ships with every bone node at identity (the real pose lives only in the skin's inverse bind
+ * matrices), which renders as a collapsed heap. Rebuild each bone's rest transform from those matrices.
+ */
+function restoreRestPose(root: THREE.Object3D) {
+  const world = new Map<THREE.Bone, THREE.Matrix4>();
+  root.traverse((o) => {
+    const sm = o as THREE.SkinnedMesh;
+    if (!sm.isSkinnedMesh) return;
+    sm.skeleton.bones.forEach((b, i) => { if (!world.has(b)) world.set(b, sm.skeleton.boneInverses[i].clone().invert()); });
+  });
+  const depth = (b: THREE.Object3D) => { let d = 0; for (let p = b.parent; p; p = p.parent) d++; return d; };
+  root.updateMatrixWorld(true);
+  [...world.keys()].sort((a, b) => depth(a) - depth(b)).forEach((b) => {
+    const par = b.parent as THREE.Bone;
+    const parentW = par && par.isBone && world.has(par) ? world.get(par)! : b.parent!.matrixWorld;
+    new THREE.Matrix4().copy(parentW).invert().multiply(world.get(b)!).decompose(b.position, b.quaternion, b.scale);
+    b.updateMatrixWorld(true);
+  });
+}
+
 /** Finds the skeleton, records rest orientations, and converts the T-pose into a relaxed arms-down stance. */
 function buildRig(scene: THREE.Object3D) {
   const root = cloneSkinned(scene) as THREE.Object3D;
   root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; } });
+  restoreRestPose(root);
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const bones = new Map<string, THREE.Bone>();
